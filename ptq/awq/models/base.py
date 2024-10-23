@@ -337,8 +337,11 @@ class BaseAWQForCausalLM(nn.Module):
     ):
         """A method for initialization of pretrained models, usually in FP16."""
         # Get weights path and quant config
+        config_cls_name = TRANSFORMERS_AUTO_CONFIG_MAPPING_DICT[config.model_type]
+        config_cls = getattr(yasa_tokenizer, config_cls_name)
+        print(f"config cls: {config_cls}")
         model_weights_path, config, quant_config = self._load_config(
-            self,
+            config_cls,
             model_path,
             "",
             safetensors,

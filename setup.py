@@ -69,7 +69,8 @@ requirements = [
     "datasets>=2.19",
     "zstandard",
     "packaging==24.1",
-    "flash-attn==2.3.3"
+    "flash-attn==2.3.3",
+    "click"
 ]
 
 try:

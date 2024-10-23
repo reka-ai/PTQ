@@ -40,7 +40,11 @@ class AutoAWQForCausalLM:
         model_type = check_and_get_model_type(
             model_path, trust_remote_code, **model_init_kwargs
         )
-
+        print(f"model type: {model_type}")
+        print(f"model cls: {AWQ_CAUSAL_LM_MODEL_MAP[model_type]}")
+        print(
+            f"model_path: {model_path}, model_type: {model_type}, trust_remote_code: {trust_remote_code}"
+        )
         return AWQ_CAUSAL_LM_MODEL_MAP[model_type].from_pretrained(
             model_path,
             model_type,
