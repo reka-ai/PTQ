@@ -44,7 +44,6 @@ def apply_scale(module, scales_list, input_feat_dict=None):
         for layer in layers:
             layer.to(best_device)
         scales.to(best_device)
-
         if (
             isinstance(prev_op, nn.Linear)
             and type(layers) == list
@@ -112,14 +111,14 @@ def scale_ln_fcs(ln: nn.Linear, fcs: List[nn.Linear], scales: torch.Tensor):
         for p in fc.parameters():
             assert torch.isnan(p).sum() == 0
 
-
 @torch.no_grad()
 def scale_fc_fc(fc1: nn.Linear, fc2: nn.Linear, scales: torch.Tensor):
     assert isinstance(fc1, nn.Linear)
     assert isinstance(fc2, nn.Linear)
 
     scales = scales.to(fc1.weight.device)
-
+    # [-scales.size(0) :] works in swiglu case where inverse scales
+    # are applied to previous
     fc1.weight[-scales.size(0) :].div_(scales.view(-1, 1))
     if fc1.bias is not None:
         fc1.bias.div_(scales.view(-1))

@@ -13,6 +13,7 @@ from safetensors.torch import save_file
 from typing_extensions import Doc, Annotated
 from huggingface_hub import snapshot_download
 from transformers.modeling_utils import shard_checkpoint
+import models.yasa as yasa
 
 from awq.modules.linear import (
     WQLinear_GEMM,
@@ -56,34 +57,11 @@ from awq.utils.module import get_named_linears, set_op_by_name
 # Since we support different `AutoModelForxxx` from transformers
 # we need to define a custom mapping dict as below:
 TRANSFORMERS_AUTO_MAPPING_DICT = {
-    "mpt": "AutoModelForCausalLM",
-    "llama": "AutoModelForCausalLM",
-    "opt": "AutoModelForCausalLM",
-    "RefinedWeb": "AutoModelForCausalLM",
-    "RefinedWebModel": "AutoModelForCausalLM",
-    "falcon": "AutoModelForCausalLM",
-    "bloom": "AutoModelForCausalLM",
-    "gptj": "AutoModelForCausalLM",
-    "gpt_bigcode": "AutoModelForCausalLM",
-    "mistral": "AutoModelForCausalLM",
-    "mixtral": "AutoModelForCausalLM",
-    "gpt_neox": "AutoModelForCausalLM",
-    "aquila": "AutoModelForCausalLM",
-    "Yi": "AutoModelForCausalLM",
-    "qwen": "AutoModelForCausalLM",
-    "baichuan": "AutoModelForCausalLM",
-    "llava": "AutoModelForVision2Seq",
-    "qwen2": "AutoModelForCausalLM",
-    "gemma": "AutoModelForCausalLM",
-    "gemma2": "AutoModelForCausalLM",
-    "stablelm": "AutoModelForCausalLM",
-    "starcoder2": "AutoModelForCausalLM",
-    "llava_next": "AutoModelForVision2Seq",
-    "phi3": "AutoModelForCausalLM",
-    "cohere": "AutoModelForCausalLM",
-    "deepseek_v2": "AutoModelForCausalLM",
-    "minicpm": "AutoModelForCausalLM",
-    "internlm2": "AutoModelForCausalLM",
+    "yasa": "YasaCausalLM",
+}
+
+TRANSFORMERS_AUTO_CONFIG_MAPPING_DICT = {
+    "yasa": "YasaConfig"
 }
 
 
@@ -368,12 +346,9 @@ class BaseAWQForCausalLM(nn.Module):
         )
 
         target_cls_name = TRANSFORMERS_AUTO_MAPPING_DICT[config.model_type]
-        target_cls = getattr(transformers, target_cls_name)
+        target_cls = getattr(yasa, target_cls_name)
 
         processor = None
-        if target_cls_name == "AutoModelForVision2Seq":
-            processor = AutoProcessor.from_pretrained(model_weights_path)
-            processor: CLIPImageProcessor = processor.image_processor
 
         # If not quantized, must load with AutoModelForCausalLM
         model = target_cls.from_pretrained(
@@ -469,8 +444,10 @@ class BaseAWQForCausalLM(nn.Module):
     ):
         """A method for initialization of a quantized model, usually in INT4."""
         # [STEP 1-2] Load weights path and configs
+        config_cls = TRANSFORMERS_AUTO_CONFIG_MAPPING_DICT[config.model_type]
         model_weights_path, config, quant_config = self._load_config(
             self,
+            config_cls,
             model_path,
             model_filename,
             safetensors,
@@ -481,7 +458,7 @@ class BaseAWQForCausalLM(nn.Module):
         )
 
         target_cls_name = TRANSFORMERS_AUTO_MAPPING_DICT[config.model_type]
-        target_cls = getattr(transformers, target_cls_name)
+        target_cls = getattr(yasa, target_cls_name)
 
         # [STEP 3] Load model
         with init_empty_weights():
@@ -561,6 +538,7 @@ class BaseAWQForCausalLM(nn.Module):
 
     def _load_config(
         self,
+        config_cls,
         model_path,
         model_filename,
         safetensors=True,
@@ -603,7 +581,7 @@ class BaseAWQForCausalLM(nn.Module):
 
         # Load model config and set max generation length
         if max_seq_len is None and hasattr(self, "max_seq_len_key"):
-            config = AutoConfig.from_pretrained(
+            config = config_cls.from_pretrained(
                 model_path, trust_remote_code=trust_remote_code, **config_kwargs
             )
             config.max_seq_len = getattr(config, self.max_seq_len_key, 2048)
@@ -614,7 +592,7 @@ class BaseAWQForCausalLM(nn.Module):
                 )
         else:
             max_seq_len = 2048 if max_seq_len is None else max_seq_len
-            config = AutoConfig.from_pretrained(
+            config = config_cls.from_pretrained(
                 model_path, trust_remote_code=trust_remote_code, **config_kwargs
             )
             config.max_seq_len = max_seq_len

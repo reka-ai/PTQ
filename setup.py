@@ -4,7 +4,7 @@ from pathlib import Path
 from setuptools import setup, find_packages
 from torch.utils.cpp_extension import CUDAExtension
 
-AUTOAWQ_VERSION = "0.2.6"
+PTQ_VERSION = "0.0.1"
 PYPI_BUILD = os.getenv("PYPI_BUILD", "0") == "1"
 INSTALL_KERNELS = os.getenv("INSTALL_KERNELS", "0") == "1"
 IS_CPU_ONLY = not torch.backends.mps.is_available() and not torch.cuda.is_available()
@@ -21,23 +21,23 @@ if ROCM_VERSION:
 
 if not PYPI_BUILD:
     if IS_CPU_ONLY:
-        AUTOAWQ_VERSION += "+cpu"
+        PTQ_VERSION += "+cpu"
     elif CUDA_VERSION:
-        AUTOAWQ_VERSION += f"+cu{CUDA_VERSION}"
+        PTQ_VERSION += f"+cu{CUDA_VERSION}"
     elif ROCM_VERSION:
-        AUTOAWQ_VERSION += f"+rocm{ROCM_VERSION}"
+        PTQ_VERSION += f"+rocm{ROCM_VERSION}"
     else:
         raise RuntimeError(
             "Your system must have either Nvidia or AMD GPU to build this package."
         )
 
 common_setup_kwargs = {
-    "version": AUTOAWQ_VERSION,
+    "version": PTQ_VERSION,
     "name": "autoawq",
     "author": "Casper Hansen",
     "license": "MIT",
     "python_requires": ">=3.8.0",
-    "description": "AutoAWQ implements the AWQ algorithm for 4-bit quantization with a 2x speedup during inference.",
+    "description": "PTQ implements the implements post training quantization algorithms such as AWQ",
     "long_description": (Path(__file__).parent / "README.md").read_text(
         encoding="UTF-8"
     ),
@@ -62,6 +62,7 @@ requirements = [
     f"torch>={TORCH_VERSION}",
     "triton",
     "transformers>=4.35.0",
+    "inseption @ git+ssh://git@github.com/reka-ai/inseption.git@main#egg=inseption"
     "tokenizers>=0.12.1",
     "typing_extensions>=4.8.0",
     "accelerate",

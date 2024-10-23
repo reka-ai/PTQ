@@ -1,20 +1,16 @@
-from .base import BaseAWQForCausalLM
-from transformers.models.gpt_neox.modeling_gpt_neox import (
-    GPTNeoXLayer,
-    GPTNeoXForCausalLM,
-)
+from awq.models.base import BaseAWQForCausalLM
+from yasa.yasa_model import *
 
-
-class GPTNeoXAWQForCausalLM(BaseAWQForCausalLM):
+class YasaAWQForCausalLM(BaseAWQForCausalLM):
     layer_type = "GPTNeoXDecoderLayer"
     max_seq_len_key = "max_position_embeddings"
 
     @staticmethod
-    def get_model_layers(model: GPTNeoXForCausalLM):
+    def get_model_layers(model: YasaCausalLM):
         return model.gpt_neox.layers
 
     @staticmethod
-    def get_act_for_scaling(module: GPTNeoXLayer):
+    def get_act_for_scaling(module: YasaLayer):
         return dict(
             is_scalable=True,
             scale_name="mlp.act",
@@ -23,11 +19,11 @@ class GPTNeoXAWQForCausalLM(BaseAWQForCausalLM):
         )
 
     @staticmethod
-    def move_embed(model: GPTNeoXForCausalLM, device: str):
+    def move_embed(model: YasaCausalLM, device: str):
         model.gpt_neox.embed_in = model.gpt_neox.embed_in.to(device)
 
     @staticmethod
-    def get_layers_for_scaling(module: GPTNeoXLayer, input_feat, module_kwargs):
+    def get_layers_for_scaling(module: YasaLayer, input_feat, module_kwargs):
         layers = []
 
         # attention input
@@ -64,6 +60,7 @@ class GPTNeoXAWQForCausalLM(BaseAWQForCausalLM):
                 prev_op=module.mlp.act,
                 layers=[module.mlp.dense_4h_to_h],
                 inp=input_feat["mlp.dense_4h_to_h"],
+                is_swiglu=True
             )
         )
 
