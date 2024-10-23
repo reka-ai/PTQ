@@ -6,7 +6,7 @@ from ptq.awq.models.base import BaseAWQForCausalLM
 
 
 AWQ_CAUSAL_LM_MODEL_MAP = {
-    "yasa": YasaAWQForCausalLM,
+    "yasa_model": YasaAWQForCausalLM,
 }
 
 
