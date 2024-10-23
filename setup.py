@@ -68,7 +68,7 @@ requirements = [
     "accelerate",
     "datasets>=2.19",
     "zstandard",
-    "flash-attn>=2.3.3"
+    "flash-attn==2.3.3"
 ]
 
 try:
