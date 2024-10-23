@@ -66,7 +66,7 @@ requirements = [
     "tokenizers>=0.12.1",
     "typing_extensions>=4.8.0",
     "accelerate",
-    "datasets>=2.20",
+    "datasets>=2.19",
     "zstandard",
 ]
 
