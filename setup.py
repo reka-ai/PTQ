@@ -42,7 +42,7 @@ common_setup_kwargs = {
         encoding="UTF-8"
     ),
     "long_description_content_type": "text/markdown",
-    "url": "https://github.com/casper-hansen/AutoAWQ",
+    "url": "https://github.com/rekaai/PTQ",
     "keywords": ["awq", "autoawq", "quantization", "transformers"],
     "platforms": ["linux", "windows"],
     "classifiers": [
