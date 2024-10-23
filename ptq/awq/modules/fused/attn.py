@@ -3,8 +3,8 @@ import math
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from awq.modules.fused.cache import WindowedCache
-from awq.utils.fused_utils import get_attention_shapes
+from ptq.awq.modules.fused.cache import WindowedCache
+from ptq.awq.utils.fused_utils import get_attention_shapes
 
 
 try:
@@ -174,7 +174,7 @@ class QuantAttentionFused(nn.Module):
 
         if kwargs.get("is_neox") is not None:
             self.is_neox = kwargs["is_neox"]
-        
+
         self.attn_logit_softcapping = attn_logit_softcapping
         self.use_sdpa = kwargs.get("use_sdpa", False)
 
@@ -210,7 +210,7 @@ class QuantAttentionFused(nn.Module):
         # This is only applicable for `transformers` integration
         if (self.is_hf_transformers and (hf_is_first_forward or hf_is_new_cache_first_forward)) or (self.is_hf_transformers and not hf_is_generating):
             self.start_pos = 0
-    
+
 
         xqkv = self.qkv_proj(hidden_states)
         xqkv = xqkv.view((bsz, seqlen) + self.attention_shapes["xqkv_view"])
@@ -294,7 +294,7 @@ class QuantAttentionFused(nn.Module):
 
                 # When seqlen is 1, there is nothing else to attend to
                 if attention_mask is not None and seqlen > 1:
-                    # For llama-arch, the causal mask is preallocated with bsz x 1 x max_seq_len x max_seq_len, thus we 
+                    # For llama-arch, the causal mask is preallocated with bsz x 1 x max_seq_len x max_seq_len, thus we
                     # need to slice it
                     if attention_mask.shape[-1] != seqlen:
                         attention_mask = attention_mask[:, :, :seqlen, :seqlen]

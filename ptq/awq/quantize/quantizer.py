@@ -6,16 +6,16 @@ import torch.nn as nn
 from tqdm import tqdm
 from typing import Dict, List, Optional
 from collections import defaultdict
-from awq.utils.calib_data import get_calib_dataset
-from awq.quantize.scale import apply_scale, apply_clip
-from awq.utils.utils import clear_memory, get_best_device
-from awq.modules.linear import (
+from ptq.awq.utils.calib_data import get_calib_dataset
+from ptq.awq.quantize.scale import apply_scale, apply_clip
+from ptq.awq.utils.utils import clear_memory, get_best_device
+from ptq.awq.modules.linear import (
     WQLinear_GEMM,
     WQLinear_GEMV,
     WQLinear_Marlin,
     WQLinear_GEMVFast,
 )
-from awq.utils.module import (
+from ptq.awq.utils.module import (
     append_str_prefix,
     get_op_name,
     get_named_linears,
@@ -312,7 +312,7 @@ class AwqQuantizer:
 
         # Use float32 for sum calculation
         x_sum = torch.zeros(num_channels, dtype=torch.float32, device=inp.device)
-        
+
         for i in range(0, num_elements, chunk_size):
             end = min(i + chunk_size, num_elements)
             chunk_sum = inp_flat[i:end].to(torch.float32).sum(dim=0)
@@ -483,7 +483,7 @@ class AwqQuantizer:
         # Compute input feature step size (minimum 1)
         step_size = max(1, input_feat.shape[1] // n_sample_token)
         input_feat = input_feat[:, ::step_size]
-        
+
         w = w.reshape(org_w_shape[0], 1, -1, group_size)
 
         oc_batch_size = 256 if org_w_shape[0] % 256 == 0 else 64  # prevent OOM

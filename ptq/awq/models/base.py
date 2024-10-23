@@ -15,7 +15,7 @@ from huggingface_hub import snapshot_download
 from transformers.modeling_utils import shard_checkpoint
 import models.yasa as yasa
 
-from awq.modules.linear import (
+from ptq.awq.modules.linear import (
     WQLinear_GEMM,
     WQLinear_GEMV,
     WQLinear_IPEX,
@@ -28,13 +28,13 @@ from awq.modules.linear import (
     exllamav2_post_init,
     ipex_post_init,
 )
-from awq.utils.module import (
+from ptq.awq.utils.module import (
     get_named_linears,
     set_op_by_name,
     exclude_layers_to_not_quantize,
     try_import,
 )
-from awq.utils.utils import get_best_device, ipex_available
+from ptq.awq.utils.utils import get_best_device, ipex_available
 from transformers import (
     AutoConfig,
     PreTrainedModel,
@@ -48,10 +48,10 @@ from accelerate.big_modeling import (
     load_checkpoint_and_dispatch,
 )
 
-from awq.models._config import AwqConfig
-from awq.modules.act import ScaledActivation
-from awq.quantize.quantizer import AwqQuantizer
-from awq.utils.module import get_named_linears, set_op_by_name
+from ptq.awq.models._config import AwqConfig
+from ptq.awq.modules.act import ScaledActivation
+from ptq.awq.quantize.quantizer import AwqQuantizer
+from ptq.awq.utils.module import get_named_linears, set_op_by_name
 
 
 # Since we support different `AutoModelForxxx` from transformers

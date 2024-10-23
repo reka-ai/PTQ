@@ -1,6 +1,6 @@
 import os
 import torch.nn as nn
-from awq.modules.fused.attn import QuantAttentionFused
+from ptq.awq.modules.fused.attn import QuantAttentionFused
 
 
 class MixtralBlock(nn.Module):
@@ -204,7 +204,7 @@ class Gemma2LikeBlock(nn.Module):
 
         hidden_states = self.norm_2(hidden_states)
         hidden_states = residual + hidden_states
-        
+
         residual = hidden_states
         hidden_states = self.norm_3(hidden_states)
         hidden_states = self.mlp(hidden_states)

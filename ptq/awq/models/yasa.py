@@ -1,4 +1,4 @@
-from awq.models.base import BaseAWQForCausalLM
+from ptq.awq.models.base import BaseAWQForCausalLM
 from yasa.yasa_model import *
 
 class YasaAWQForCausalLM(BaseAWQForCausalLM):
