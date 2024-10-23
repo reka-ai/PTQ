@@ -13,7 +13,8 @@ from safetensors.torch import save_file
 from typing_extensions import Doc, Annotated
 from huggingface_hub import snapshot_download
 from transformers.modeling_utils import shard_checkpoint
-import models.yasa as yasa
+import ptq.yasa.yasa_model as yasa
+import ptq.yasa.yasa_tokenizer as yasa_tokenizer
 
 from ptq.awq.modules.linear import (
     WQLinear_GEMM,
@@ -444,7 +445,9 @@ class BaseAWQForCausalLM(nn.Module):
     ):
         """A method for initialization of a quantized model, usually in INT4."""
         # [STEP 1-2] Load weights path and configs
-        config_cls = TRANSFORMERS_AUTO_CONFIG_MAPPING_DICT[config.model_type]
+        config_cls_name = TRANSFORMERS_AUTO_CONFIG_MAPPING_DICT[config.model_type]
+        config_cls = getattr(yasa_tokenizer, config_cls_name)
+
         model_weights_path, config, quant_config = self._load_config(
             self,
             config_cls,

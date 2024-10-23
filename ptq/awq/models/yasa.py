@@ -1,5 +1,5 @@
 from ptq.awq.models.base import BaseAWQForCausalLM
-from yasa.yasa_model import *
+from ptq.yasa.yasa_model import *
 
 class YasaAWQForCausalLM(BaseAWQForCausalLM):
     layer_type = "GPTNeoXDecoderLayer"
